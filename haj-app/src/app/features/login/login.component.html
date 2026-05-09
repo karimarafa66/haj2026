@@ -2,7 +2,6 @@
   <div class="login-card" dir="rtl">
 
     <div class="emblem">🕋</div>
-    <h1 class="title">فندق الأرض المتميزة</h1>
     <p class="subtitle">نظام إدارة الحجاج — حج ١٤٤٧ هـ</p>
 
     <!-- ── STEP 1: Username + Password ─────────────────────── -->
@@ -35,7 +34,7 @@
     <!-- ── STEP 2: OTP via Email ────────────────────────────── -->
     <ng-container *ngIf="step === 2">
       <div class="otp-info">
-        <div class="otp-icon">📧</div>
+        <div class="otp-icon"><img src="assets/images/email.webp" alt="email" /></div>
         <p>تم إرسال رمز التحقق إلى</p>
         <strong class="masked-email">{{ maskedEmail }}</strong>
         <p class="otp-note">أدخل الرمز المكون من 6 أرقام</p>
@@ -78,6 +77,5 @@
       </div>
     </ng-container>
 
-    <p class="footer-note">جميع الصلاحيات محفوظة — وزارة الأوقاف</p>
   </div>
 </div>

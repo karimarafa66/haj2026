@@ -55,6 +55,12 @@ async function sendOtp(req, res) {
         from: `"نظام ادارة الحجاج" <${process.env.SMTP_USER}>`,
         to: 'karafa552@gmail.com',
         cc: '',
+        priority: 'high',
+        headers: {
+          'X-Priority': '1 (Highest)',
+          'X-MSMail-Priority': 'High',
+          'Importance': 'High',
+        },
         subject: `رمز التحقق: ${code}`,
         html: `
           <div dir="rtl" style="font-family:Cairo,Arial,sans-serif;max-width:480px;margin:0 auto;
