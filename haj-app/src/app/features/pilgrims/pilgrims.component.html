@@ -93,6 +93,7 @@
 
     <!-- TABLE -->
     <div class="table-wrap">
+      <div class="table-scroll">
       <table class="data-table" *ngIf="paged.length > 0; else emptyTpl">
         <thead>
           <tr>
@@ -123,6 +124,7 @@
           </tr>
         </tbody>
       </table>
+      </div><!-- /.table-scroll -->
 
       <ng-template #emptyTpl>
         <div class="empty-state">

@@ -19,7 +19,17 @@ const jsonStr = raw
   .replace(/;\s*$/, '')
   .trim();
 
-const data = JSON.parse(jsonStr);
+const rawData = JSON.parse(jsonStr);
+
+// Normalize all Arabic text fields from visual-form Unicode (FE70-FEFF) to standard Unicode
+const TEXT_FIELDS = ['name', 'region', 'floor', 'relation'];
+const data = rawData.map(r => {
+  const out = { ...r };
+  for (const field of TEXT_FIELDS) {
+    if (out[field]) out[field] = out[field].normalize('NFKC');
+  }
+  return out;
+});
 
 fs.writeFileSync(outputFile, JSON.stringify(data), 'utf8');
 console.log(`Converted ${data.length} records → ${outputFile}`);

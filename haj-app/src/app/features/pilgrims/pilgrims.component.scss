@@ -12,6 +12,8 @@ $cream-dim: rgba(247, 240, 224, 0.65);
 $border-gold: rgba(201, 168, 76, 0.3);
 
 // ── Base ───────────────────────────────────────────────────
+$header-height: 90px;
+
 .app-wrapper {
   min-height: 100vh;
   background: $bg;
@@ -26,7 +28,7 @@ $border-gold: rgba(201, 168, 76, 0.3);
   padding: 1rem 1.5rem;
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 50;
 
   .header-inner {
     max-width: 1400px;
@@ -231,21 +233,29 @@ $border-gold: rgba(201, 168, 76, 0.3);
 .table-wrap {
   max-width: 1400px;
   margin: 0.75rem auto 0;
-  padding: 0 1rem;
+  padding: 0 1rem 2rem;
+}
+
+.table-scroll {
   overflow-x: auto;
+  // overflow-x on this inner wrapper allows horizontal scroll on mobile
+  // while keeping position:sticky on thead working correctly within page scroll
 }
 
 .data-table {
   width: 100%;
+  min-width: 900px;
   border-collapse: collapse;
   font-size: 0.83rem;
   direction: rtl;
+  table-layout: auto;
 
   thead tr {
     background: $table-header-bg;
     position: sticky;
-    top: 88px;
-    z-index: 2;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
   }
 
   th {
@@ -276,12 +286,22 @@ $border-gold: rgba(201, 168, 76, 0.3);
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-.cell-num { color: rgba($cream, 0.4); font-size: 0.75rem; text-align: center; }
-.cell-name { font-weight: 600; min-width: 200px; }
-.cell-passport { font-family: monospace; color: $gold-light; letter-spacing: 0.5px; }
-.cell-nid { font-family: monospace; font-size: 0.78rem; color: rgba($cream, 0.5); direction: ltr; text-align: left; }
-.cell-flight { text-align: center; color: rgba($cream, 0.55); }
-.cell-region { font-size: 0.78rem; color: $cream-dim; }
+.cell-num { color: rgba($cream, 0.4); font-size: 0.75rem; text-align: center; white-space: nowrap; }
+.cell-name {
+  font-weight: 600;
+  min-width: 220px;
+  max-width: 320px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  unicode-bidi: plaintext;
+  direction: rtl;
+}
+.cell-passport { font-family: monospace; color: $gold-light; letter-spacing: 0.5px; white-space: nowrap; }
+.cell-nid { font-family: monospace; font-size: 0.78rem; color: rgba($cream, 0.5); direction: ltr; text-align: left; white-space: nowrap; }
+.cell-flight { text-align: center; color: rgba($cream, 0.55); white-space: nowrap; }
+.cell-region { font-size: 0.78rem; color: $cream-dim; white-space: nowrap; }
+.cell-req { white-space: nowrap; }
 
 .badge-room {
   border: 1px solid rgba($gold, 0.5);
