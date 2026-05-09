@@ -104,15 +104,17 @@ export class PilgrimsComponent implements OnInit, OnDestroy {
   }
 
   applyFilters(): void {
-    const term = normalizeAr(this.searchTerm.trim());
+    const words = normalizeAr(this.searchTerm.trim()).split(/\s+/).filter(Boolean);
     this.filtered = this.allRecords.filter(r => {
       if (this.filterFloor && r.floor !== this.filterFloor) return false;
       if (this.filterRoom && r.room !== this.filterRoom) return false;
       if (this.filterRegion && r.region !== this.filterRegion) return false;
       if (this.filterRelation && r.relation !== this.filterRelation) return false;
-      if (term) {
+      if (words.length) {
+        // Each typed word must appear somewhere in the record (order-independent).
+        // This handles reversed PDF names: "امال ابراهيم" matches "نافع محمود ابراهيم امال".
         const haystack = normalizeAr(`${r.name} ${r.passport} ${r.national_id} ${r.request_num}`);
-        if (!haystack.includes(term)) return false;
+        if (!words.every(w => haystack.includes(w))) return false;
       }
       return true;
     });
