@@ -3,8 +3,8 @@
 pdf_to_excel.py  —  Extract Haj pilgrim data from PDF and write an Excel file
 
 Usage:
-    python pdf_to_excel.py                        # uses Ajyad.pdf → output.xlsx
-    python pdf_to_excel.py path/to/file.pdf       # custom PDF → output.xlsx
+    python pdf_to_excel.py                        # uses data-sources/hajPDF.pdf
+    python pdf_to_excel.py path/to/file.pdf       # custom PDF → excel-data/
     python pdf_to_excel.py path/to/file.pdf out.xlsx  # custom PDF + output name
 
 Requirements:
@@ -19,9 +19,17 @@ from pathlib import Path
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
-SCRIPT_DIR = Path(__file__).parent
-PDF_PATH   = Path(sys.argv[1]) if len(sys.argv) > 1 else SCRIPT_DIR / 'Ajyad.pdf'
-OUT_PATH   = Path(sys.argv[2]) if len(sys.argv) > 2 else PDF_PATH.with_suffix('.xlsx')
+SCRIPT_DIR  = Path(__file__).parent
+PROJECT_DIR = SCRIPT_DIR.parent
+PDF_PATH    = Path(sys.argv[1]) if len(sys.argv) > 1 else PROJECT_DIR / 'data-sources' / 'hajPDF.pdf'
+
+if len(sys.argv) > 2:
+    OUT_PATH = Path(sys.argv[2])
+elif PDF_PATH == (PROJECT_DIR / 'data-sources' / 'hajPDF.pdf'):
+    pdf_name = PDF_PATH.stem
+    OUT_PATH = PROJECT_DIR / 'excel-data' / f'{pdf_name}_new.xlsx'
+else:
+    OUT_PATH = PDF_PATH.with_suffix('.xlsx')
 
 if not PDF_PATH.exists():
     print(f'ERROR: PDF not found: {PDF_PATH}')

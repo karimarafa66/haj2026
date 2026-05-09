@@ -3,11 +3,11 @@
 pdf_to_data.py  —  Extract Haj pilgrim data from PDF and write data.js
 
 Usage:
-    python pdf_to_data.py                        # uses hajPDF.pdf in same folder
+    python pdf_to_data.py                        # uses data-sources/hajPDF.pdf
     python pdf_to_data.py path/to/other.pdf      # any PDF
 
 Output:
-    data.js  (same folder as the script)
+    data.js  (project root, i.e. ../data.js)
 
 Requirements:
     pip install pdfplumber
@@ -22,8 +22,9 @@ import unicodedata
 from pathlib import Path
 
 # ── Paths ────────────────────────────────────────────────────────────────────
-SCRIPT_DIR = Path(__file__).parent
-OUT_PATH   = SCRIPT_DIR / 'data.js'
+SCRIPT_DIR  = Path(__file__).parent
+PROJECT_DIR = SCRIPT_DIR.parent
+OUT_PATH    = PROJECT_DIR / 'data.js'
 
 try:
     import pdfplumber
@@ -350,7 +351,7 @@ def main():
         print('pdfplumber not installed. Run: pip install pdfplumber')
         sys.exit(1)
 
-    pdf_path = Path(sys.argv[1]) if len(sys.argv) > 1 else SCRIPT_DIR / 'Ajyad.pdf'
+    pdf_path = Path(sys.argv[1]) if len(sys.argv) > 1 else PROJECT_DIR / 'data-sources' / 'hajPDF.pdf'
     if not pdf_path.exists():
         print(f'ERROR: PDF not found: {pdf_path}')
         sys.exit(1)
