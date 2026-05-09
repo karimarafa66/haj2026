@@ -1,64 +1,83 @@
 <div class="login-bg">
   <div class="login-card" dir="rtl">
-    <!-- <div class="emblem">🕋</div>
+
+    <div class="emblem">🕋</div>
     <h1 class="title">فندق الأرض المتميزة</h1>
-    <p class="subtitle">نظام إدارة الحجاج — حج ١٤٤٧ هـ</p> -->
+    <p class="subtitle">نظام إدارة الحجاج — حج ١٤٤٧ هـ</p>
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-      <div class="field">
-        <label for="username">اسم المستخدم</label>
-        <input
-          id="username"
-          type="text"
-          formControlName="username"
-          autocomplete="username"
-          placeholder="أدخل اسم المستخدم"
-          [class.invalid]="form.get('username')?.invalid && form.get('username')?.touched"
-        />
+    <!-- ── STEP 1: Username + Password ─────────────────────── -->
+    <ng-container *ngIf="step === 1">
+      <form [formGroup]="credForm" (ngSubmit)="onCredSubmit()" novalidate>
+
+        <div class="field">
+          <label for="username">اسم المستخدم</label>
+          <input id="username" type="text" formControlName="username"
+                 autocomplete="username" placeholder="أدخل اسم المستخدم"
+                 [class.invalid]="credForm.get('username')?.invalid && credForm.get('username')?.touched" />
+        </div>
+
+        <div class="field">
+          <label for="password">كلمة المرور</label>
+          <input id="password" type="password" formControlName="password"
+                 autocomplete="current-password" placeholder="أدخل كلمة المرور"
+                 [class.invalid]="credForm.get('password')?.invalid && credForm.get('password')?.touched" />
+        </div>
+
+        <div class="error-msg" *ngIf="error">⚠ {{ error }}</div>
+
+        <button type="submit" class="login-btn" [disabled]="loading">
+          <span *ngIf="!loading">إرسال رمز التحقق</span>
+          <span *ngIf="loading" class="spinner"></span>
+        </button>
+      </form>
+    </ng-container>
+
+    <!-- ── STEP 2: OTP via Email ────────────────────────────── -->
+    <ng-container *ngIf="step === 2">
+      <div class="otp-info">
+        <div class="otp-icon">📧</div>
+        <p>تم إرسال رمز التحقق إلى</p>
+        <strong class="masked-email">{{ maskedEmail }}</strong>
+        <p class="otp-note">أدخل الرمز المكون من 6 أرقام</p>
       </div>
 
-      <div class="field">
-        <label for="password">كلمة المرور</label>
-        <input
-          id="password"
-          type="password"
-          formControlName="password"
-          autocomplete="current-password"
-          placeholder="أدخل كلمة المرور"
-          [class.invalid]="form.get('password')?.invalid && form.get('password')?.touched"
-        />
-      </div>
-
-      <div class="field">
-        <label for="timePin">
-          رمز الوقت
-          <button type="button" class="hint-btn" (click)="toggleMinuteHint()" title="ما هو رمز الوقت؟">؟</button>
-        </label>
-        <input
-          id="timePin"
-          type="text"
-          formControlName="timePin"
-          inputmode="numeric"
-          maxlength="2"
-          placeholder="دقيقة الساعة الحالية (00–59)"
-          [class.invalid]="form.get('timePin')?.invalid && form.get('timePin')?.touched"
-        />
-        <div class="minute-hint" *ngIf="showMinuteHint">
-          <span>أدخل الدقيقة الحالية من الساعة.</span>
-          <br>
-          <span>مثال: إذا الوقت الآن 04:07 أدخل <strong>07</strong></span>
+      <div class="otp-wrap" (click)="focusHidden()">
+        <input #hiddenOtp
+               class="otp-hidden"
+               type="text" inputmode="numeric" autocomplete="one-time-code"
+               maxlength="6"
+               [value]="otpValue"
+               (input)="onHiddenInput($event)"
+               (paste)="onOtpPaste($event)"
+               (focus)="hiddenFocused = true"
+               (blur)="hiddenFocused = false" />
+        <div class="otp-boxes">
+          <div *ngFor="let _ of [0,1,2,3,4,5]; let i = index"
+               class="otp-box"
+               [class.filled]="otpValue.length > i"
+               [class.active]="otpValue.length === i && hiddenFocused">
+            {{ otpValue[i] || '' }}
+          </div>
         </div>
       </div>
 
-      <div class="error-msg" *ngIf="error">
-        <span>⚠</span> {{ error }}
-      </div>
+      <div class="error-msg" *ngIf="error">⚠ {{ error }}</div>
 
-      <button type="submit" class="login-btn" [disabled]="loading">
-        <span *ngIf="!loading">دخول</span>
+      <button type="button" class="login-btn" [disabled]="loading || otpCode.length !== 6"
+              (click)="onOtpSubmit()">
+        <span *ngIf="!loading">تأكيد الدخول</span>
         <span *ngIf="loading" class="spinner"></span>
       </button>
-    </form>
 
+      <div class="otp-actions">
+        <button type="button" class="link-btn" [disabled]="resendCooldown > 0" (click)="resendOtp()">
+          {{ resendCooldown > 0 ? 'إعادة الإرسال بعد ' + resendCooldown + ' ث' : 'إعادة إرسال الرمز' }}
+        </button>
+        <span class="divider">|</span>
+        <button type="button" class="link-btn" (click)="backToCredentials()">تغيير بيانات الدخول</button>
+      </div>
+    </ng-container>
+
+    <p class="footer-note">جميع الصلاحيات محفوظة — وزارة الأوقاف</p>
   </div>
 </div>

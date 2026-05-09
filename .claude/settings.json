@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(node -e ' *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(timeout 4 node index.js)",
+      "Bash(node index.js)",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/send-otp -H 'Content-Type: application/json' -d '{\"username\":\"admin26\",\"password\":\"Admin@Haj26#\"}')",
+      "Bash(pkill -f \"node index.js\")",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/send-otp -H 'Content-Type: application/json' -H 'Origin: http://localhost:4200' -d '{\"username\":\"admin26\",\"password\":\"Admin@Haj26#\"}')"
     ]
   }
 }

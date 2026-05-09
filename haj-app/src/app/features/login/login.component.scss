@@ -177,3 +177,110 @@
   color: rgba(247, 240, 224, 0.3);
   margin-top: 1.5rem;
 }
+
+// ── OTP Step ──────────────────────────────────────────────
+.otp-info {
+  text-align: center;
+  margin-bottom: 1.5rem;
+
+  .otp-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+
+  p { font-size: 0.85rem; color: rgba(247, 240, 224, 0.65); margin: 0 0 0.25rem; }
+
+  .masked-email {
+    display: block;
+    color: #e8c97e;
+    font-size: 0.95rem;
+    margin: 0.2rem 0 0.5rem;
+    direction: ltr;
+  }
+
+  .otp-note { font-size: 0.8rem; color: rgba(247, 240, 224, 0.45); }
+}
+
+.otp-wrap {
+  position: relative;
+  margin-bottom: 1.25rem;
+  cursor: text;
+}
+
+.otp-hidden {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: transparent;
+  outline: none;
+  font-size: 16px; // prevent iOS zoom
+  letter-spacing: 1.5rem; // spread caret across the boxes
+  z-index: 2;
+  padding: 0;
+  text-align: center;
+}
+
+.otp-boxes {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  direction: ltr;
+  pointer-events: none;
+}
+
+.otp-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 54px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(201, 168, 76, 0.35);
+  border-radius: 10px;
+  color: #e8c97e;
+  font-family: 'Cairo', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+
+  &.active {
+    border-color: #c9a84c;
+    box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.18);
+    background: rgba(201, 168, 76, 0.07);
+  }
+
+  &.filled {
+    border-color: rgba(201, 168, 76, 0.7);
+    background: rgba(201, 168, 76, 0.1);
+  }
+}
+
+.otp-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 1rem;
+
+  .divider { color: rgba(247, 240, 224, 0.25); font-size: 0.75rem; }
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: rgba(201, 168, 76, 0.8);
+  cursor: pointer;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.78rem;
+  padding: 0;
+  transition: color 0.2s;
+
+  &:hover:not(:disabled) { color: #e8c97e; }
+
+  &:disabled {
+    color: rgba(247, 240, 224, 0.3);
+    cursor: default;
+  }
+}
