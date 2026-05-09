@@ -163,6 +163,10 @@ export class PilgrimsComponent implements OnInit, OnDestroy {
     return /^\d+$/.test(code) ? code : '—';
   }
 
+  reverseName(name: string): string {
+    return name.trim().split(/\s+/).reverse().join(' ');
+  }
+
   logout(): void { this.auth.logout(); }
 
   hasActiveFilter(): boolean {
