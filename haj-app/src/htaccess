@@ -1,6 +1,15 @@
+Options -MultiViews
 RewriteEngine On
 RewriteBase /
 
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^ index.html [L]
+# Allow CORS preflight
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]
+
+# Serve existing files and directories directly
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Route everything else to index.html (Angular SPA fallback)
+RewriteRule ^ /index.html [L]
