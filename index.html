@@ -11,6 +11,27 @@
 </head>
 <body>
 
+<div id="loginOverlay">
+  <div class="login-box">
+    <div class="login-emblem">🕋</div>
+    <h2 class="login-title">فندق الأرض المتميزة</h2>
+    <p class="login-subtitle">يرجى تسجيل الدخول للوصول إلى البيانات</p>
+    <form id="loginForm" autocomplete="off">
+      <div class="login-field">
+        <label for="loginUser">اسم المستخدم</label>
+        <input type="text" id="loginUser" placeholder="أدخل اسم المستخدم" required>
+      </div>
+      <div class="login-field">
+        <label for="loginPass">كلمة المرور</label>
+        <input type="password" id="loginPass" placeholder="أدخل كلمة المرور" required>
+      </div>
+      <div id="loginError" class="login-error" style="display:none">اسم المستخدم أو كلمة المرور غير صحيحة</div>
+      <button type="submit" class="login-btn">دخول</button>
+    </form>
+  </div>
+</div>
+
+<div id="appContent" style="display:none">
 <header>
   <div class="header-inner">
     <div class="header-emblem">🕋</div>
@@ -19,6 +40,7 @@
       <div class="subtitle">وزارة الداخلية • الإدارة العامة للشئون الإدارية • تقرير الحجاج المسكنين بالغرف</div>
     </div>
     <div class="header-badge">حج عام 2026 م</div>
+    <button id="logoutBtn" class="logout-btn" title="تسجيل الخروج" onclick="logout()">خروج</button>
   </div>
 </header>
 
@@ -47,7 +69,7 @@
   </div>
 </div>
 
-<div id="loading">
+<div id="loading" style="display:none">
   <div class="spinner"></div>
   <span>جاري تحميل البيانات...</span>
 </div>
@@ -104,8 +126,8 @@
   <div class="pagination" id="pagination"></div>
   <div class="page-info" id="pageInfo"></div>
 </div>
+</div>
 
-<script src="data.js" defer></script>
 <script src="script.js" defer></script>
 </body>
 </html>

@@ -4,11 +4,77 @@ let allData = [];
 let filtered = [];
 let currentPage = 1;
 
-// Embed data inline
-const DATA_JSON = window.DATA_JSON || [];
+function getDATA() { return window.DATA_JSON || []; }
 
-function init() {
-  allData = DATA_JSON.map(r => {
+const AUTH_USER_HASH = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918';
+const AUTH_PASS_HASH = '4aaaa999a691dd7b60d75cd47642704646cbe46a4e5af4a7c9445d2270e16b11';
+
+const AUTH_SESSION_KEY = 'haj_auth';
+const AUTH_TIMEOUT = 30 * 60 * 1000;
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function isAuthenticated() {
+  const ts = sessionStorage.getItem(AUTH_SESSION_KEY);
+  if (!ts) return false;
+  if (Date.now() - parseInt(ts, 10) > AUTH_TIMEOUT) {
+    sessionStorage.removeItem(AUTH_SESSION_KEY);
+    return false;
+  }
+  return true;
+}
+
+function refreshSession() {
+  sessionStorage.setItem(AUTH_SESSION_KEY, String(Date.now()));
+}
+
+function logout() {
+  sessionStorage.removeItem(AUTH_SESSION_KEY);
+  location.reload();
+}
+
+function setupLogin() {
+  const overlay = document.getElementById('loginOverlay');
+  const form = document.getElementById('loginForm');
+  const errorEl = document.getElementById('loginError');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const user = document.getElementById('loginUser').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    const userHash = await sha256(user);
+    const passHash = await sha256(pass);
+    if (userHash === AUTH_USER_HASH && passHash === AUTH_PASS_HASH) {
+      refreshSession();
+      overlay.style.display = 'none';
+      document.body.style.overflow = '';
+      loadAndInit();
+    } else {
+      errorEl.style.display = 'block';
+      document.getElementById('loginPass').value = '';
+    }
+  });
+}
+
+function loadAndInit() {
+  const script = document.createElement('script');
+  script.src = 'data.js';
+  script.onload = () => {
+    initApp();
+    document.getElementById('appContent').style.display = 'block';
+    setInterval(() => { if (!isAuthenticated()) logout(); }, 60000);
+    document.addEventListener('mousemove', refreshSession);
+    document.addEventListener('keydown', refreshSession);
+    document.addEventListener('click', refreshSession);
+  };
+  document.body.appendChild(script);
+}
+
+function initApp() {
+  allData = getDATA().map(r => {
     const name = normalizeDisplayArabic(r.name);
     return {
       ...r,
@@ -58,7 +124,7 @@ function init() {
   applyFilters();
 
   document.getElementById('loading').style.display = 'none';
-  document.getElementById('main').style.display = '';
+  document.getElementById('main').style.display = 'block';
 }
 
 function populateSelect(id, items, labelFn) {
@@ -263,6 +329,16 @@ function debounce(fn, ms) {
 }
 
 // Init on load
-window.addEventListener('DOMContentLoaded', init);
+window.addEventListener('DOMContentLoaded', () => {
+  document.body.style.overflow = 'hidden';
+  if (isAuthenticated()) {
+    refreshSession();
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.body.style.overflow = '';
+    loadAndInit();
+  } else {
+    setupLogin();
+  }
+});
 
 

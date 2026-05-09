@@ -21,23 +21,18 @@ import os
 import unicodedata
 from pathlib import Path
 
-# ── stdout UTF-8 for console debug prints ───────────────────────────────────
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-
 # ── Paths ────────────────────────────────────────────────────────────────────
 SCRIPT_DIR = Path(__file__).parent
-PDF_PATH   = Path(sys.argv[1]) if len(sys.argv) > 1 else SCRIPT_DIR / 'Ajyad.pdf'
 OUT_PATH   = SCRIPT_DIR / 'data.js'
-
-if not PDF_PATH.exists():
-    print(f'ERROR: PDF not found: {PDF_PATH}')
-    sys.exit(1)
 
 try:
     import pdfplumber
 except ImportError:
-    print('pdfplumber not installed. Run: pip install pdfplumber')
-    sys.exit(1)
+    pdfplumber = None  # checked at runtime in main()
+
+# ── stdout UTF-8 (only when run directly, not when imported) ─────────────────
+if __name__ == '__main__':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 def nfkc(s: str) -> str:
@@ -86,37 +81,43 @@ REGION_PATTERNS = [
     (lambda tokens: 'ﺦﻴﺸﻟﺍ' in tokens and 'ﺮﻔﻛ' in tokens,    'كفر الشيخ'),
     (lambda tokens: 'ﺮﺤﺒﻟﺍ' in tokens and 'ﺮﻤﺣﻻﺍ' in tokens,  'البحر الاحمر'),
     (lambda tokens: 'ﺮﺤﺒﻟﺍ' in tokens,                           'البحر الاحمر'),  # fallback
-    (lambda tokens: 'ﻪﻴﻓﻮﻨﻤﻟﺍ' in tokens,                        'ﺍﻟﻤﻨﻮﻓﻴﻪ'),
-    (lambda tokens: 'ﻪﻴﺑﻮﻴﻠﻘﻟﺍ' in tokens,                        'ﺍﻟﻘﻠﻴﻮﺑﻴﻪ'),
-    (lambda tokens: 'ﺔﻳﺮﺤﺒﻟﺍ' in tokens or 'ﻪﻳﺮﺤﺒﻟﺍ' in tokens, 'ﺍﻟﺒﺤﻴﺮﻩ'),
-    (lambda tokens: 'ﺔﻴﺑﺮﻐﻟﺍ' in tokens,                          'ﺍﻟﻐﺮﺑﻴﻪ'),
+    (lambda tokens: 'ﻪﻴﻓﻮﻨﻤﻟﺍ' in tokens,                        'المنوفيه'),
+    (lambda tokens: 'ﻪﻴﺑﻮﻴﻠﻘﻟﺍ' in tokens,                        'القليوبيه'),
+    (lambda tokens: 'ﺔﻳﺮﺤﺒﻟﺍ' in tokens or 'ﻪﻳﺮﺤﺒﻟﺍ' in tokens, 'البحيره'),
+    (lambda tokens: 'ﺔﻴﺑﺮﻐﻟﺍ' in tokens,                          'الغربيه'),
     (lambda tokens: 'ﺕﻻﺯﺎﻨﺘﻟﺍ' in tokens,                        'التنازلات'),
-    (lambda tokens: 'ﺎﻨﻗ' in tokens,                               'ﻗﻨﺎ'),
-    (lambda tokens: 'ﺓﺮﻫﺎﻘﻟﺍ' in tokens,                          'ﺍﻟﻘﺎﻫﺮﻩ'),
-    (lambda tokens: 'ﻪﻴﻣﻮﻴﻔﻟﺍ' in tokens,                         'ﺍﻟﻔﻴﻮﻣﻴﻪ'),
+    (lambda tokens: 'ﺎﻨﻗ' in tokens,                               'قنا'),
+    (lambda tokens: 'ﺓﺮﻫﺎﻘﻟﺍ' in tokens,                          'القاهره'),
+    (lambda tokens: 'ﻪﻴﻣﻮﻴﻔﻟﺍ' in tokens,                         'الفيوميه'),
     (lambda tokens: 'ﺮﻤﺣﻻﺍ' in tokens,                            'البحر الاحمر'),  # الاحمر alone
 ]
 
 # Known relation tokens in visual/presentation form
 RELATION_TOKENS_VISUAL = {
-    'ﺐﻠﻃ ﻡﺪﻘﻣ': 'ﻃﻠﺐ ﻣﻘﺪﻡ',
-    'ﺖﺧﺃ': 'ﺃﺧﺖ',
-    'ﺥﺃ': 'ﺃﺥ',
-    'ﻦﺑﺍ': 'ﺍﺑﻦ',
-    'ﺔﻨﺑﺍ': 'ﺍﺑﻨﻪ',
-    'ﺝﻭﺰﻟﺍ': 'ﺍﻟﺰﻭﺝ',
-    'ﺔﺟﻭﺰﻟﺍ': 'ﺍﻟﺰﻭﺟﻪ',
-    'ﺔﺟﻭﺯ': 'ﺯﻭﺟﻪ',
-    'ﺝﻭﺯ': 'ﺯﻭﺝ',
-    'ﺏﻷﺍ': 'ﺍﻷﺏ',
-    'ﻡﻷﺍ': 'ﺍﻷﻡ',
-    'ﻡﺃ': 'ﺃﻡ',
-    'ﺓﺎﻤﺤﻟﺍ': 'ﺍﻟﺤﻤﺎﺓ',
-    'ﻡﺎﻤﺤﻟﺍ': 'ﺍﻟﺤﻤﺎﻡ',
-    'ﺪﻴﻔﺤﻟﺍ': 'ﺍﻟﺤﻔﻴﺪ',
-    'ﺓﺪﻴﻔﺤﻟﺍ': 'ﺍﻟﺤﻔﻴﺪﻩ',
-    'ﻩﺮﻫﺎﺼﻣ': 'ﻣﺼﺎﻫﺮﻩ',
-    'ﻪﺑﺎﺴﻧ': 'ﻧﺴﺐ',
+    'ﺐﻠﻃ ﻡﺪﻘﻣ': 'طلب مقدم',
+    'ﺖﺧﺃ': 'أخت',
+    'ﺥﺃ': 'أخ',
+    'ﻦﺑﺍ': 'ابن',
+    'ﺔﻨﺑﺍ': 'ابنه',
+    'ﺝﻭﺰﻟﺍ': 'الزوج',
+    'ﺔﺟﻭﺰﻟﺍ': 'الزوجه',
+    'ﺔﺟﻭﺯ': 'زوجه',
+    'ﺝﻭﺯ': 'زوج',
+    'ﺏﻷﺍ': 'الأب',
+    'ﻡﻷﺍ': 'الأم',
+    'ﻡﺃ': 'أم',
+    'ﺓﺎﻤﺤﻟﺍ': 'الحماة',
+    'ﻡﺎﻤﺤﻟﺍ': 'الحمام',
+    'ﺪﻴﻔﺤﻟﺍ': 'الحفيد',
+    'ﺓﺪﻴﻔﺤﻟﺍ': 'الحفيده',
+    'ﻩﺮﻫﺎﺼﻣ': 'مصاهره',
+    'ﻪﺑﺎﺴﻧ': 'نسب',
+    'ﻪﻨﺑﺍ': 'ابنه',
+    'ﺖﺧﻷﺍ': 'أخت',
+    'ﻦﺑﻷﺍ': 'ابن',
+    'ﺔﻟﺎﺨﻟﺍ': 'الخالة',
+    'ﺐﺴﻧ': 'نسب',
+    'ﺏﺃ': 'أب',
     'ﺥﻷﺍ ﺔﻨﺑﺃ': 'ابنة الأخ',
     'ﻝﺎﺨﻟﺍ ﻪﻨﺑﺍ': 'ابن الخال',
     'ﻝﺎﺨﻟﺍ ﺔﻨﺑﺍ': 'ابنة الخال',
@@ -128,7 +129,7 @@ RELATION_SINGLE_TOKENS = {
     'ﺝﻭﺰﻟﺍ', 'ﺔﺟﻭﺰﻟﺍ', 'ﺔﺟﻭﺯ', 'ﺝﻭﺯ',
     'ﺏﻷﺍ', 'ﻡﻷﺍ', 'ﻡﺃ',
     'ﺓﺎﻤﺤﻟﺍ', 'ﻡﺎﻤﺤﻟﺍ', 'ﺪﻴﻔﺤﻟﺍ', 'ﺓﺪﻴﻔﺤﻟﺍ',
-    'ﻩﺮﻫﺎﺼﻣ', 'ﻪﺑﺎﺴﻧ', 'ﻝﺎﺨﻟﺍ', 'ﺥﻷﺍ', 'ﺔﻨﺑﺃ',
+    'ﻩﺮﻫﺎﺼﻣ', 'ﻪﺑﺎﺴﻧ', 'ﻝﺎﺨﻟﺍ', 'ﺥﻷﺍ', 'ﺔﻨﺑﺃ', 'ﻪﻨﺑﺍ', 'ﺖﺧﻷﺍ', 'ﻦﺑﻷﺍ', 'ﺔﻟﺎﺨﻟﺍ', 'ﺐﺴﻧ', 'ﺏﺃ',
 }
 
 SKIP_PHRASES = ['ﺕﺎﻈﺣﻼﻣ', 'ﻑﺮﻐﻟﺎﺑ', 'ﺓﺭﺍﺯﻭ', 'ﺓﺭﺍﺩﻹﺍ', 'ﻕﺪﻨﻓ', 'ﻑﺮﻏ ﻰﻠﻋ', 'ﻝﺎﻤﺟﺇ']
@@ -160,10 +161,10 @@ def detect_relation(line: str) -> str:
     for key, val in RELATION_TOKENS_VISUAL.items():
         if line.startswith(key):
             return nfkc(val)
-    # single token
+    # single token — visual-form chars are reversed, so reverse after NFKC
     first = line.split()[0] if line.split() else ''
     if first in RELATION_SINGLE_TOKENS:
-        return nfkc(first)
+        return nfkc(first)[::-1]
     return ''
 
 
@@ -269,9 +270,9 @@ def parse_pdf(pdf_path: Path) -> list[dict]:
 
                 # ── relation ──────────────────────────────────────────────────
                 relation = detect_relation(line)
-                # Fallback NFKC relation from first token if still empty
+                # Fallback: visual-form chars reversed, so reverse after NFKC
                 if not relation and before:
-                    relation = nfkc(before[0])
+                    relation = nfkc(before[0])[::-1]
 
                 # ── name: text between passport and national_id ───────────────
                 idx_nat  = line.find(national_id)
@@ -343,14 +344,24 @@ def write_data_js(records: list[dict], out_path: Path):
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 def main():
-    print(f'Parsing: {PDF_PATH}')
-    records = parse_pdf(PDF_PATH)
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+
+    if pdfplumber is None:
+        print('pdfplumber not installed. Run: pip install pdfplumber')
+        sys.exit(1)
+
+    pdf_path = Path(sys.argv[1]) if len(sys.argv) > 1 else SCRIPT_DIR / 'Ajyad.pdf'
+    if not pdf_path.exists():
+        print(f'ERROR: PDF not found: {pdf_path}')
+        sys.exit(1)
+
+    print(f'Parsing: {pdf_path}')
+    records = parse_pdf(pdf_path)
     print(f'Raw records extracted: {len(records)}')
 
     records = post_process(records)
     print(f'After dedup / cleanup: {len(records)}')
 
-    # Summary
     from collections import Counter
     floors  = Counter(r['floor']  for r in records)
     regions = Counter(r['region'] for r in records)
