@@ -1,0 +1,65 @@
+<div class="login-bg">
+  <div class="login-card" dir="rtl">
+    <div class="emblem">🕋</div>
+    <h1 class="title">فندق الأرض المتميزة</h1>
+    <p class="subtitle">نظام إدارة الحجاج — حج ١٤٤٧ هـ</p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <div class="field">
+        <label for="username">اسم المستخدم</label>
+        <input
+          id="username"
+          type="text"
+          formControlName="username"
+          autocomplete="username"
+          placeholder="أدخل اسم المستخدم"
+          [class.invalid]="form.get('username')?.invalid && form.get('username')?.touched"
+        />
+      </div>
+
+      <div class="field">
+        <label for="password">كلمة المرور</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          autocomplete="current-password"
+          placeholder="أدخل كلمة المرور"
+          [class.invalid]="form.get('password')?.invalid && form.get('password')?.touched"
+        />
+      </div>
+
+      <div class="field">
+        <label for="timePin">
+          رمز الوقت
+          <button type="button" class="hint-btn" (click)="toggleMinuteHint()" title="ما هو رمز الوقت؟">؟</button>
+        </label>
+        <input
+          id="timePin"
+          type="text"
+          formControlName="timePin"
+          inputmode="numeric"
+          maxlength="2"
+          placeholder="دقيقة الساعة الحالية (00–59)"
+          [class.invalid]="form.get('timePin')?.invalid && form.get('timePin')?.touched"
+        />
+        <div class="minute-hint" *ngIf="showMinuteHint">
+          <span>أدخل الدقيقة الحالية من الساعة.</span>
+          <br>
+          <span>مثال: إذا الوقت الآن 04:07 أدخل <strong>07</strong></span>
+        </div>
+      </div>
+
+      <div class="error-msg" *ngIf="error">
+        <span>⚠</span> {{ error }}
+      </div>
+
+      <button type="submit" class="login-btn" [disabled]="loading">
+        <span *ngIf="!loading">دخول</span>
+        <span *ngIf="loading" class="spinner"></span>
+      </button>
+    </form>
+
+    <p class="footer-note">جميع الصلاحيات محفوظة — وزارة الأوقاف</p>
+  </div>
+</div>
