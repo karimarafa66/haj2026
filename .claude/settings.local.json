@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command \"Get-Content 'd:\\\\Dev\\\\Haj\\\\data.js' -Encoding UTF8 | Select-Object -First 3\")"
+    ]
+  }
+}
