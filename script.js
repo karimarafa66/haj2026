@@ -178,7 +178,7 @@ function renderTable() {
   tbody.innerHTML = pageData.map((r, i) => `
     <tr>
       <td class="td-num">${(start + i + 1).toLocaleString('ar')}</td>
-      <td class="td-name">${highlight(r.name.split(' ').reverse().join(' '), q)}</td>
+      <td class="td-name">${highlight(r.name, q)}</td>
       <td class="td-passport">${highlight(r.passport, q)}</td>
       <td class="td-national" dir="ltr">${highlight(r.national_id, q)}</td>
       <td><span class="room-badge">${r.room}</span></td>
